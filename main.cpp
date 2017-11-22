@@ -1,19 +1,30 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QtQml>
+#include <QQuickStyle>
 #include "uibackend.h"
 #include "networkbackend.h"
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
+
+    QGuiApplication app(argc, argv);;
     qmlRegisterType<UiBackEnd>("uibackend",1,0,"UiBackEnd");
     QQmlApplicationEngine engine;
+    QQuickStyle::setStyle("Material");
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;
 
+
+
+
+
     UiBackEnd master;
+
+    QQmlContext *context = engine.rootContext();
+    context->setContextProperty("ComboBoxModel", QVariant::fromValue(*master.listOfPorts));
+
     qRegisterMetaType<QAbstractSocket::SocketError>("QAbstractSocket::SocketError");
     QThread* thread = new QThread;
     NetworkBackEnd* worker = new NetworkBackEnd();

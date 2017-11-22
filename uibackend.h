@@ -14,11 +14,14 @@
 class UiBackEnd : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QStringList comboList READ comboList)
 public:
     explicit UiBackEnd(QObject *parent = nullptr);
     ~UiBackEnd();
+    QStringList* listOfPorts;
+    const QStringList comboList();
 private:
-     QStringList* listOfPorts;
+
 public slots:
      void slotGetInfoMessage(QString txt);
 signals:

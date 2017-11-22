@@ -1,7 +1,8 @@
 TEMPLATE = app
 
-QT += qml quick
-QT += network
+QT += qml quick\
+      network\
+      quickcontrols2
 CONFIG += c++11
 
 SOURCES += main.cpp \

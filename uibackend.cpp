@@ -20,7 +20,10 @@ UiBackEnd::UiBackEnd(QObject *parent) : QObject(parent)
         //ui->portBox->addItems(*listOfPorts);
         //connect(ui->startbtn, SIGNAL(clicked()),this, SLOT(slotStartServer()));
 }
-
+const QStringList UiBackEnd::comboList()
+{
+    return *listOfPorts;
+}
 void UiBackEnd::slotGetInfoMessage(QString txt)
 {
      //ui->info->append(txt);
