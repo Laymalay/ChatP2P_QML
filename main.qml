@@ -8,12 +8,16 @@ Window {
     id: window
     objectName: "window"
     visible: true
-    width: 300
-    height: 400
+    width: 400
+    height: 500
+    color: "#efe2ef"
     title: qsTr("Hello World")
 
     ComboBox{
         id : ports_combobox
+        width: 131
+        height: 49
+        opacity: 1
         anchors.top: parent.top
         anchors.topMargin: 10
         anchors.left: parent.left
@@ -22,8 +26,19 @@ Window {
 
     }
     Button{
-        x: 400
+        id: button
+        x: 276
+        width: 114
+        height: 49
         text: "Start"
+        font.family: "Tahoma"
+        font.letterSpacing: 7
+        font.wordSpacing: 0
+        font.weight: Font.Light
+        font.capitalization: Font.AllUppercase
+        font.bold: true
+        transformOrigin: Item.Center
+        opacity: 1
         anchors.top: parent.top
         anchors.topMargin: 10
         anchors.right: parent.right
@@ -34,19 +49,31 @@ Window {
     }
 
     ListView {
-        id: view
-        y: 74
-        height: 316
+        id: msgView
+        y: 92
+        height: 398
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 10
         anchors.left: parent.left
         anchors.leftMargin: 10
         anchors.right: parent.right
         anchors.rightMargin: 10
-        model:master.comboList
-        delegate: Text {
-                text:modelData
-            }
+        model:master.messages
+        spacing: 20
+
+        delegate: Rectangle {
+               width: parent.width; height: 30
+               color: "#d4b9d4"
+               Text{
+                   anchors.centerIn: parent
+                   text: modelData
+               }
+           }
+
+        Connections {
+               target: master
+               onMessagesChanged: console.log("Image failed to load:", messages)
+           }
     }
 
 }

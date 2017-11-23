@@ -2,7 +2,8 @@
 #include "networkbackend.h"
 UiBackEnd::UiBackEnd(QObject *parent) : QObject(parent)
 {
-    listOfPorts = new QStringList();
+    _comboList = new QStringList();
+    _messages = new QStringList();
     QFile file("://ports.txt");
         if(file.open(QIODevice::ReadOnly |QIODevice::Text))
         {
@@ -10,7 +11,7 @@ UiBackEnd::UiBackEnd(QObject *parent) : QObject(parent)
             {
                 QString str = file.readLine();
                 str.remove(str.length()-1,1);
-                listOfPorts->append(str);
+                _comboList->append(str);
             }
         }
         else
@@ -18,20 +19,25 @@ UiBackEnd::UiBackEnd(QObject *parent) : QObject(parent)
             qDebug()<< "can't open file";
         }
 }
-const QStringList UiBackEnd::comboList()
+QStringList UiBackEnd::comboList()
 {
-    return *listOfPorts;
+    return *_comboList;
+}
+QStringList UiBackEnd::messages()
+{
+    return *_messages;
 }
 void UiBackEnd::slotGetInfoMessage(QString txt)
 {
-     //ui->info->append(txt);
+    _messages->append(txt);
+    emit messagesChanged(messages());
 }
 
 void UiBackEnd::slotStartServer(QString port)
 {
     QString thisPort = port;
     qDebug()<<"START SERVER WITH PORT: "<<port;
-    //emit signalStartServer(listOfPorts,thisPort);
+    emit signalStartServer(_comboList,thisPort);
 }
 
 UiBackEnd::~UiBackEnd()
