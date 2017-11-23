@@ -14,20 +14,22 @@
 class UiBackEnd : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QStringList comboList READ comboList)
+    Q_PROPERTY(QStringList comboList READ comboList NOTIFY comboListChanged)
 public:
     explicit UiBackEnd(QObject *parent = nullptr);
     ~UiBackEnd();
     QStringList* listOfPorts;
+    QStringList* messages;
     const QStringList comboList();
 private:
 
 public slots:
      void slotGetInfoMessage(QString txt);
 signals:
+    void comboListChanged();
     void signalStartServer(QStringList *listOfPorts,QString thisPort);
-private slots:
-    void slotStartServer();
+public slots:
+    void slotStartServer(QString port);
 };
 
 

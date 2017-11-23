@@ -9,9 +9,10 @@ int main(int argc, char *argv[])
 {
 
     QGuiApplication app(argc, argv);;
-    qmlRegisterType<UiBackEnd>("uibackend",1,0,"UiBackEnd");
     QQmlApplicationEngine engine;
     QQuickStyle::setStyle("Material");
+    UiBackEnd master;
+    engine.rootContext()->setContextProperty("master", &master);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;
@@ -20,11 +21,9 @@ int main(int argc, char *argv[])
 
 
 
-    UiBackEnd master;
-
-    QQmlContext *context = engine.rootContext();
-    context->setContextProperty("ComboBoxModel", QVariant::fromValue(*master.listOfPorts));
-
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    ///                CONNECT WORKER AND MASTER                                                  ///
+    /////////////////////////////////////////////////////////////////////////////////////////////////
     qRegisterMetaType<QAbstractSocket::SocketError>("QAbstractSocket::SocketError");
     QThread* thread = new QThread;
     NetworkBackEnd* worker = new NetworkBackEnd();
@@ -37,6 +36,7 @@ int main(int argc, char *argv[])
     thread->start();
     QObject::connect(&master,&UiBackEnd::signalStartServer,worker, &NetworkBackEnd::slotStartServer);
     QObject::connect(worker,&NetworkBackEnd::sendInfoMessage,&master, &UiBackEnd::slotGetInfoMessage);
+
 
     return app.exec();
 }

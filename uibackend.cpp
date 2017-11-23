@@ -17,8 +17,6 @@ UiBackEnd::UiBackEnd(QObject *parent) : QObject(parent)
         {
             qDebug()<< "can't open file";
         }
-        //ui->portBox->addItems(*listOfPorts);
-        //connect(ui->startbtn, SIGNAL(clicked()),this, SLOT(slotStartServer()));
 }
 const QStringList UiBackEnd::comboList()
 {
@@ -29,9 +27,10 @@ void UiBackEnd::slotGetInfoMessage(QString txt)
      //ui->info->append(txt);
 }
 
-void UiBackEnd::slotStartServer()
+void UiBackEnd::slotStartServer(QString port)
 {
-    //QString thisPort = ui->portBox->currentText();
+    QString thisPort = port;
+    qDebug()<<"START SERVER WITH PORT: "<<port;
     //emit signalStartServer(listOfPorts,thisPort);
 }
 
