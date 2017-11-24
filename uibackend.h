@@ -7,6 +7,7 @@
 #include <QMap>
 #include <QTcpSocket>
 #include <QTcpServer>
+#include <QtSql>
 #include <QTime>
 #include <QThread>
 #include <QDataStream>
@@ -18,13 +19,19 @@ class UiBackEnd : public QObject
     Q_PROPERTY(QStringList messages READ messages  NOTIFY messagesChanged)
 public:
     explicit UiBackEnd(QObject *parent = nullptr);
-    ~UiBackEnd();
+    Q_INVOKABLE void destructor();
     QStringList* _comboList;
     QStringList* _messages;
 
     QStringList comboList();
     QStringList messages();
 private:
+    void connectToDB();
+    void getPortsFromDB();
+    void updateDB(QString port);
+    QSqlDatabase db;
+    QString thisPort;
+    QStringList* _listOfPorts;
 public slots:
     void slotGetInfoMessage(QString txt);
 signals:

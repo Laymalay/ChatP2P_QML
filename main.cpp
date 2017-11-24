@@ -17,10 +17,6 @@ int main(int argc, char *argv[])
     if (engine.rootObjects().isEmpty())
         return -1;
 
-
-
-
-
     /////////////////////////////////////////////////////////////////////////////////////////////////
     ///                CONNECT WORKER AND MASTER                                                  ///
     /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -36,7 +32,6 @@ int main(int argc, char *argv[])
     thread->start();
     QObject::connect(&master,&UiBackEnd::signalStartServer,worker, &NetworkBackEnd::slotStartServer);
     QObject::connect(worker,&NetworkBackEnd::sendInfoMessage,&master, &UiBackEnd::slotGetInfoMessage);
-
 
     return app.exec();
 }

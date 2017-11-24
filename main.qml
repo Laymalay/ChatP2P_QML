@@ -11,42 +11,8 @@ Window {
     width: 400
     height: 500
     color: "#efe2ef"
-    title: qsTr("Hello World")
+    title: qsTr("TCPCONNECTION")
 
-    ComboBox{
-        id : ports_combobox
-        width: 131
-        height: 49
-        opacity: 1
-        anchors.top: parent.top
-        anchors.topMargin: 10
-        anchors.left: parent.left
-        anchors.leftMargin: 10
-        model: master.comboList
-
-    }
-    Button{
-        id: button
-        x: 276
-        width: 114
-        height: 49
-        text: "Start"
-        font.family: "Tahoma"
-        font.letterSpacing: 7
-        font.wordSpacing: 0
-        font.weight: Font.Light
-        font.capitalization: Font.AllUppercase
-        font.bold: true
-        transformOrigin: Item.Center
-        opacity: 1
-        anchors.top: parent.top
-        anchors.topMargin: 10
-        anchors.right: parent.right
-        anchors.rightMargin: 10
-        onClicked: {
-            master.slotStartServer(ports_combobox.currentText)
-        }
-    }
 
     ListView {
         id: msgView
@@ -70,10 +36,39 @@ Window {
                }
            }
 
-        Connections {
-               target: master
-               onMessagesChanged: console.log("Image failed to load:", messages)
-           }
+    }
+
+
+    Button {
+        id: fileButton
+        text: "Choose port"
+        anchors.left: parent.left
+        anchors.leftMargin: 10
+        anchors.top: parent.top
+        anchors.topMargin: 10
+        onClicked: menu.open()
+        Menu {
+            id: menu
+            y: fileButton.height
+            Repeater {
+                      model: master.comboList
+                      MenuItem {
+                            text: modelData
+                            onClicked: {
+                                master.slotStartServer(this.text)
+                                fileButton.visible = false
+                            }
+                      }
+            }
+        }
+    }
+
+    RoundButton {
+        id: roundButton
+        x: 350
+        y: 10
+        text: "x"
+        onClicked: master.destructor()
     }
 
 }

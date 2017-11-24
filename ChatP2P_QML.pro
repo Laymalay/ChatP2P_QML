@@ -2,7 +2,8 @@ TEMPLATE = app
 
 QT += qml quick\
       network\
-      quickcontrols2
+      quickcontrols2\
+      sql
 CONFIG += c++11
 
 SOURCES += main.cpp \
@@ -11,7 +12,7 @@ SOURCES += main.cpp \
 
 
 RESOURCES +=qml.qrc \
-    files.qrc
+            files.qrc
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
 
