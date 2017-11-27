@@ -8,7 +8,8 @@ CONFIG += c++11
 
 SOURCES += main.cpp \
     uibackend.cpp \
-    networkbackend.cpp
+    networkbackend.cpp \
+    user.cpp
 
 
 RESOURCES +=qml.qrc \
@@ -37,6 +38,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     uibackend.h \
-    networkbackend.h
+    networkbackend.h \
+    user.h
 
 DISTFILES +=

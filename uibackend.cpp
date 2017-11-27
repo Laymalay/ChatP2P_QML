@@ -4,7 +4,8 @@ UiBackEnd::UiBackEnd(QObject *parent) : QObject(parent)
 {
     _comboList = new QStringList();
     _messages = new QStringList();
-    _listOfPorts = new QStringList();
+    _portList = new QStringList();
+
     connectToDB();
     getPortsFromDB();
 }
@@ -12,9 +13,28 @@ QStringList UiBackEnd::comboList()
 {
     return *_comboList;
 }
+QStringList UiBackEnd::portList()
+{
+    return *_portList;
+}
+
+
 QStringList UiBackEnd::messages()
 {
     return *_messages;
+}
+QQmlListProperty<User> UiBackEnd::users()
+{
+    return QQmlListProperty<User>(this, _users);
+}
+int UiBackEnd::userCount() const
+{
+    return _users.count();
+}
+
+User *UiBackEnd::user(int index) const
+{
+    return _users.at(index);
 }
 
 
@@ -29,14 +49,16 @@ void UiBackEnd::slotStartServer(QString port)
     updateDB(port);
     thisPort = port;
     qDebug()<<"START SERVER WITH PORT: "<<port;
-    emit signalStartServer(_listOfPorts,thisPort);
+    emit signalStartServer(_portList,thisPort);
 }
 
 void UiBackEnd::destructor()
 {
-    qDebug()<<"clean"<<thisPort;
-    QSqlQuery query(db);
-    query.exec("UPDATE ports SET status = 'free' WHERE number =" + thisPort);
+    qDebug()<<"Destructor";
+    if(thisPort!=""){
+        QSqlQuery query(db);
+        query.exec("UPDATE ports SET status = 'free' WHERE number =" + thisPort);
+    }
 }
 
 void UiBackEnd::connectToDB()
@@ -56,7 +78,9 @@ void UiBackEnd::connectToDB()
     query.exec("SELECT number FROM ports");
     while (query.next()) {
        QString port = query.value(0).toString();
-       _listOfPorts->append(port);
+       _portList->append(port);
+       User* user = new User(port);
+       _users.append(user);
     }
 }
 
