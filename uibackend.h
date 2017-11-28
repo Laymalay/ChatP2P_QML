@@ -23,7 +23,7 @@ class UiBackEnd : public QObject
     Q_PROPERTY(QStringList comboList READ comboList NOTIFY comboListChanged)
     Q_PROPERTY(QStringList portList READ portList NOTIFY portListChanged)
     Q_PROPERTY(QStringList messages READ messages NOTIFY messagesChanged)
-    Q_PROPERTY(QQmlListProperty<User> users READ users)
+    Q_PROPERTY(QQmlListProperty<User> users READ users NOTIFY usersChanged)
 public:
     explicit UiBackEnd(QObject *parent = nullptr);
     Q_INVOKABLE void destructor();
@@ -46,11 +46,13 @@ private:
     QString thisPort;
     QList<User *> _users;
 public slots:
+    void slotNewUserOnline(QString addr);
     void slotGetInfoMessage(QString txt);
 signals:
     void messagesChanged(QStringList messages);
-    void comboListChanged(QString newItem);
-    void portListChanged(QStringList list);
+    void comboListChanged();
+    void portListChanged();
+    void usersChanged();
     void signalStartServer(QStringList *listOfPorts,QString thisPort);
 public slots:
     void slotStartServer(QString port);

@@ -14,3 +14,8 @@ QString User::address()
 {
     return _address;
 }
+
+void User::setStatus(bool stat)
+{
+    _isOnline = stat;
+}

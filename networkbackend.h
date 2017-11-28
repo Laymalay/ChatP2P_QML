@@ -21,6 +21,7 @@ public slots:
 signals:
     void finished();
     void newConnection();
+    void NewUserOnline(QString addr);
     void sendInfoMessage(QString txt);
 
 private:

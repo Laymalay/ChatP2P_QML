@@ -144,8 +144,8 @@ void NetworkBackEnd::slotLookUpNewConnections(){
           if(socket->waitForConnected(500000)){
               qDebug()<<thisPort+"+"+notConnectedYet->at(i)<< "Connected in"<<timer.elapsed();
               portMap->insert((notConnectedYet->at(i)).toInt(),socket);
+              emit NewUserOnline(notConnectedYet->at(i));
               notConnectedYet->removeAt(i);
-
           }
           else{
               disconnect(socket, SIGNAL(connected()),this, SLOT(slotConnected()));

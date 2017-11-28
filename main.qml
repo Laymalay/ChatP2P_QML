@@ -4,6 +4,9 @@ import QtQuick.Controls 1.4
 import QtQuick.Controls 2.2
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.3
+import QtGraphicalEffects 1.0
+import QtQuick.Controls.Styles 1.4
+
 
 
 Window {
@@ -12,8 +15,9 @@ Window {
     visible: true
     width: 700
     height: 600
-    color: "#9EDDF2"
+    color: '#e2e8e4'
     title: qsTr("TCPCONNECTION")
+    flags : Qt.WindowStaysOnTopHint;
 
     SplitView {
         id: splitView
@@ -22,11 +26,13 @@ Window {
 
         Rectangle{
             id: rectangle
-
+            color:'#6eb5c0'
             width: 250
             Button {
                 id: fileButton
                 text: "Choose port"
+
+
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.top: parent.top
@@ -50,34 +56,44 @@ Window {
             }
 
 
-            ListView{
-
-                id: portsOnline
-                anchors.top: fileButton.bottom
-                anchors.topMargin: 10
-                anchors.right: parent.right
-                anchors.rightMargin: 10
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 10
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                spacing: 20
-                model:master.users
-                boundsBehavior: Flickable.DragOverBounds
-                delegate: Rectangle {
-                       border {color: "#9EDDF2"; width: 2}
-                       radius: 10
-                       width: parent.width; height: 30
-                       color: modelData.address?"red":"green"
+                ListView{
+                    id: portsOnline
+                    anchors.top: fileButton.bottom
+                    anchors.topMargin: 10
+                    anchors.right: parent.right
+                    anchors.rightMargin: 10
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 10
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    spacing: 20
+                    model:master.users
+                    boundsBehavior: Flickable.DragOverBounds
+                    delegate: Item {
+                        width: parent.width; height: 60
+                        Rectangle{
+                            id:rect
+                            width: 50
+                            height: 50
+                            Image {
+                                    id: img
+                                    width:40
+                                    height: 40
+                                    source: "qrc:/userpic2.png"
+                                    anchors.centerIn: rect
+                               }
+                            border {color: modelData.isOnline?"#006c84":"#ffccbb"; width: 5}
+                            radius: 50
+                        }
                        Text{
                            anchors.centerIn: parent
                            text: modelData.address
-
                        }
-                   }
-            }
+                    }
 
-        }
+                }
+    }
+
 
         ListView {
             id: msgView
@@ -97,7 +113,7 @@ Window {
             delegate: Rectangle {
                    width: parent.width;
                    height: 30
-
+                   border{color:"#006c84"}
                    color: "white"
                    radius: 10
                    Text{

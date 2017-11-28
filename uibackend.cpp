@@ -101,4 +101,16 @@ void UiBackEnd::updateDB(QString port)
     query.exec("UPDATE ports SET status = 'busy' WHERE number =" + port);
 }
 
+void UiBackEnd::slotNewUserOnline(QString addr)
+{
+    qDebug()<<addr;
+    for(int i=0;i<_users.size();i++){
+        if (_users.at(i)->address() == addr){
+            _users.at(i)->setStatus(true);
+            _users.at(i)->statusChanged();
+        }
+        qDebug()<<_users.at(i)->address() << " "<<_users.at(i)->isOnline();
+    }
+}
+
 

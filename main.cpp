@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
     thread->start();
     QObject::connect(&master,&UiBackEnd::signalStartServer,worker, &NetworkBackEnd::slotStartServer);
     QObject::connect(worker,&NetworkBackEnd::sendInfoMessage,&master, &UiBackEnd::slotGetInfoMessage);
+    QObject::connect(worker,&NetworkBackEnd::NewUserOnline,&master, &UiBackEnd::slotNewUserOnline);
     QObject::connect(&app,&QGuiApplication::lastWindowClosed,&master,&UiBackEnd::destructor);
     return app.exec();
 }
