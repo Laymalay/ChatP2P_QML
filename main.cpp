@@ -32,8 +32,10 @@ int main(int argc, char *argv[])
     thread->moveToThread(thread);
     thread->start();
     QObject::connect(&master,&UiBackEnd::signalStartServer,worker, &NetworkBackEnd::slotStartServer);
+    QObject::connect(&master,&UiBackEnd::logout,worker, &NetworkBackEnd::slotLogout);
     QObject::connect(worker,&NetworkBackEnd::sendInfoMessage,&master, &UiBackEnd::slotGetInfoMessage);
     QObject::connect(worker,&NetworkBackEnd::NewUserOnline,&master, &UiBackEnd::slotNewUserOnline);
+    QObject::connect(worker,&NetworkBackEnd::socketDisconnected,&master, &UiBackEnd::slotUserDisconnected);
     QObject::connect(&app,&QGuiApplication::lastWindowClosed,&master,&UiBackEnd::destructor);
     return app.exec();
 }

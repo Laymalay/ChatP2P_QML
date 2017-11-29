@@ -16,6 +16,7 @@ public:
     QMap<int,QTcpSocket*>* portMap;
 public slots:
     void process();
+    void slotLogout();
     void slotStartServer(QStringList *listOfPorts, QString thisPort);
 
 signals:
@@ -23,12 +24,13 @@ signals:
     void newConnection();
     void NewUserOnline(QString addr);
     void sendInfoMessage(QString txt);
+    void socketDisconnected(QString address);
 
 private:
     quint16 m_nNextBlockSize;
     QTcpServer* server;
     QTcpSocket* socket;
-    QStringList* notConnectedYet;
+    QStringList notConnectedYet;
     QTimer* timer;
 private:
     void sendMsgToSocket(QTcpSocket* pSocket, const QString& str);

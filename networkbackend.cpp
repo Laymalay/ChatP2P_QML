@@ -19,10 +19,10 @@ void NetworkBackEnd::process(){
 void NetworkBackEnd::slotStartServer(QStringList *_listOfPorts, QString _thisPort)
 {
 
-    this->listOfPorts = _listOfPorts;
-    this->thisPort = _thisPort;
-    this->notConnectedYet = listOfPorts;
-    notConnectedYet->removeAt(notConnectedYet->indexOf(thisPort));
+    listOfPorts = _listOfPorts;
+    thisPort = _thisPort;
+    notConnectedYet = *listOfPorts;
+    notConnectedYet.removeAt(notConnectedYet.indexOf(thisPort));
     qDebug()<<"server: "+thisPort;
     emit sendInfoMessage("server "+ thisPort + " has started");
 
@@ -34,6 +34,8 @@ void NetworkBackEnd::slotStartServer(QStringList *_listOfPorts, QString _thisPor
         return;
     }
     connect(server, SIGNAL(newConnection()),this,SLOT(slotNewConnection()));
+    for(int i =0;i<notConnectedYet.size();i++)
+        qDebug()<<notConnectedYet.at(i);
     timer->start();
 }
 
@@ -49,12 +51,28 @@ void NetworkBackEnd::sendMsgToSocket(QTcpSocket* pSocket, const QString& str)
     pSocket->write(arrBlock);
 }
 
+
 void NetworkBackEnd::slotNewConnection() {
     qDebug()<<"NEW CONNECTION";
     QTcpSocket* socket = server->nextPendingConnection();
     connect(socket, SIGNAL(disconnected()),socket, SLOT(deleteLater()));
     connect(socket, SIGNAL(readyRead()),this, SLOT(slotReadSocket()));
     sendMsgToSocket(socket, "Response: Connected! " + thisPort);
+}
+
+void NetworkBackEnd::slotLogout()
+{
+    qDebug()<<"======================================DISCONNECT====================================";
+    timer->stop();
+    server->close();
+    for(auto e: portMap->toStdMap()){
+       QTcpSocket* s = e.second;
+       qDebug()<<s->peerAddress()<<s->peerName()<<s->peerPort();
+       s->close();
+       s->deleteLater();
+       portMap->remove(e.first);
+
+    }
 }
 
 void NetworkBackEnd::slotReadSocket()
@@ -123,6 +141,7 @@ void NetworkBackEnd::slotError(QAbstractSocket::SocketError err)
                          "the connection was refused." :
                          QString(socket->errorString())
             );
+   emit socketDisconnected(QString::number(socket->peerPort()));
    emit sendInfoMessage(strError);
 
 }
@@ -132,7 +151,8 @@ NetworkBackEnd::~NetworkBackEnd()
 }
 
 void NetworkBackEnd::slotLookUpNewConnections(){
-    for (int i=0;i<notConnectedYet->size();i++){
+    qDebug()<<"slotLookUpNewConnections";
+    for (int i=0;i<notConnectedYet.size();i++){
           QTime timer;
           timer.start();
           QTcpSocket* socket = new QTcpSocket();
@@ -140,12 +160,12 @@ void NetworkBackEnd::slotLookUpNewConnections(){
           connect(socket, SIGNAL(readyRead()),this, SLOT(slotReadyRead()));
           connect(socket, SIGNAL(error(QAbstractSocket::SocketError)),
                   this, SLOT(slotError(QAbstractSocket::SocketError)));
-          socket->connectToHost("localhost",(notConnectedYet->at(i)).toInt());
+          socket->connectToHost("localhost",(notConnectedYet.at(i)).toInt());
           if(socket->waitForConnected(500000)){
-              qDebug()<<thisPort+"+"+notConnectedYet->at(i)<< "Connected in"<<timer.elapsed();
-              portMap->insert((notConnectedYet->at(i)).toInt(),socket);
-              emit NewUserOnline(notConnectedYet->at(i));
-              notConnectedYet->removeAt(i);
+              qDebug()<<thisPort+"+"+notConnectedYet.at(i)<< "Connected in"<<timer.elapsed();
+              portMap->insert((notConnectedYet.at(i)).toInt(),socket);
+              emit NewUserOnline(notConnectedYet.at(i));
+              notConnectedYet.removeAt(i);
           }
           else{
               disconnect(socket, SIGNAL(connected()),this, SLOT(slotConnected()));
@@ -153,7 +173,7 @@ void NetworkBackEnd::slotLookUpNewConnections(){
               disconnect(socket, SIGNAL(error(QAbstractSocket::SocketError)),
                       this, SLOT(slotError(QAbstractSocket::SocketError)));
               socket->deleteLater();
-              qDebug()<<thisPort+"+"+notConnectedYet->at(i)<< "Not connected in"<<timer.elapsed();
+              qDebug()<<thisPort+"+"+notConnectedYet.at(i)<< "Not connected in"<<timer.elapsed();
           }
      }
 }

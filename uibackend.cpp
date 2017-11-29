@@ -44,10 +44,37 @@ void UiBackEnd::slotGetInfoMessage(QString txt)
     emit messagesChanged(messages());
 }
 
+void UiBackEnd::slotLogout()
+{
+    User* u = new User(thisPort);
+    _users.append(u);
+    emit usersChanged();
+    emit logout();
+    QSqlQuery query(db);
+    query.exec("UPDATE ports SET status = 'free' WHERE number =" + thisPort);
+    thisPort = "";
+}
+
+void UiBackEnd::slotUserDisconnected(QString address)
+{
+    for(int i=0;i<_users.size();i++){
+        if(_users.at(i)->address() == address){
+            _users.at(i)->setStatus(false);
+            emit usersChanged();
+        }
+    }
+}
+
 void UiBackEnd::slotStartServer(QString port)
 {
     updateDB(port);
     thisPort = port;
+    for(int i=0;i<_users.size();i++){
+        if(_users.at(i)->address() == thisPort){
+            _users.removeAt(i);
+            emit usersChanged();
+        }
+    }
     qDebug()<<"START SERVER WITH PORT: "<<port;
     emit signalStartServer(_portList,thisPort);
 }
@@ -97,8 +124,10 @@ void UiBackEnd::getPortsFromDB()
 
 void UiBackEnd::updateDB(QString port)
 {
+
     QSqlQuery query(db);
     query.exec("UPDATE ports SET status = 'busy' WHERE number =" + port);
+    qDebug()<<"UPDATE ports SET status = 'busy' WHERE number =" + port;
 }
 
 void UiBackEnd::slotNewUserOnline(QString addr)

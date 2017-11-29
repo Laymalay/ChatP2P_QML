@@ -48,11 +48,14 @@ private:
 public slots:
     void slotNewUserOnline(QString addr);
     void slotGetInfoMessage(QString txt);
+    void slotLogout();
+    void slotUserDisconnected(QString address);
 signals:
     void messagesChanged(QStringList messages);
     void comboListChanged();
     void portListChanged();
     void usersChanged();
+    void logout();
     void signalStartServer(QStringList *listOfPorts,QString thisPort);
 public slots:
     void slotStartServer(QString port);

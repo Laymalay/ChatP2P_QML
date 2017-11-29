@@ -31,8 +31,6 @@ Window {
             Button {
                 id: fileButton
                 text: "Choose port"
-
-
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.top: parent.top
@@ -48,51 +46,65 @@ Window {
                                     text: modelData
                                     onClicked: {
                                         master.slotStartServer(this.text)
-                                        fileButton.visible = false
-                                    }
+                                        fileButton.enabled = false
+                                        logoutbtn.visible = true}
                               }
                     }
                 }
             }
+            Button {
+                id:logoutbtn
+                text: "logout"
+                anchors.left: fileButton.right
+                anchors.leftMargin: 30
+                anchors.bottom: portsOnline.top
+                anchors.bottomMargin: 10
+                anchors.top: parent.top
+                anchors.topMargin: 10
+                visible: false
+                onClicked: {
+                    master.slotLogout()
+                    fileButton.enabled = true
+                    this.visible = false}
+
+            }
 
 
-                ListView{
-                    id: portsOnline
-                    anchors.top: fileButton.bottom
-                    anchors.topMargin: 10
-                    anchors.right: parent.right
-                    anchors.rightMargin: 10
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 10
-                    anchors.left: parent.left
-                    anchors.leftMargin: 10
-                    spacing: 20
-                    model:master.users
-                    boundsBehavior: Flickable.DragOverBounds
-                    delegate: Item {
-                        width: parent.width; height: 60
-                        Rectangle{
-                            id:rect
-                            width: 50
-                            height: 50
-                            Image {
-                                    id: img
-                                    width:40
-                                    height: 40
-                                    source: "qrc:/userpic2.png"
-                                    anchors.centerIn: rect
-                               }
-                            border {color: modelData.isOnline?"#006c84":"#ffccbb"; width: 5}
-                            radius: 50
-                        }
-                       Text{
-                           anchors.centerIn: parent
-                           text: modelData.address
-                       }
-                    }
 
+            ListView{
+                id: portsOnline
+                anchors.top: fileButton.bottom
+                anchors.topMargin: 10
+                anchors.right: parent.right
+                anchors.rightMargin: 10
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 10
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                spacing: 20
+                model:master.users
+                boundsBehavior: Flickable.DragOverBounds
+                delegate: Item {
+                    width: parent.width; height: 60
+                    Rectangle{
+                        id:rect
+                        width: 50
+                        height: 50
+                        Image {
+                            id: img
+                            width:40
+                            height: 40
+                            source: "qrc:/userpic2.png"
+                            anchors.centerIn: rect}
+                        border {color: modelData.isOnline?"#006c84":"#ffccbb"; width: 5}
+                        radius: 50}
+                    Text{
+                        anchors.centerIn: parent
+                        text: modelData.address}
                 }
-    }
+
+            }
+        }
 
 
         ListView {
@@ -109,7 +121,6 @@ Window {
             boundsBehavior: Flickable.DragOverBounds
             model:master.messages
             spacing: 20
-
             delegate: Rectangle {
                    width: parent.width;
                    height: 30
@@ -118,8 +129,7 @@ Window {
                    radius: 10
                    Text{
                        anchors.centerIn: parent
-                       text: modelData
-                   }
+                       text: modelData}
                }
 
         }
