@@ -51,7 +51,7 @@ public slots:
     void slotLogout();
     void slotUserDisconnected(QString address);
 signals:
-    void messagesChanged(QStringList messages);
+    void messagesChanged();
     void comboListChanged();
     void portListChanged();
     void usersChanged();

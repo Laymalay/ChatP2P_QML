@@ -30,7 +30,9 @@ Window {
             width: 250
             Button {
                 id: fileButton
+                background: Rectangle {radius: 10}
                 text: "Choose port"
+                spacing: 0
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.top: parent.top
@@ -54,9 +56,11 @@ Window {
             }
             Button {
                 id:logoutbtn
+                background: Rectangle {radius: 10}
                 text: "logout"
                 anchors.left: fileButton.right
-                anchors.leftMargin: 30
+                anchors.right: portsOnline.right
+                anchors.leftMargin: 34
                 anchors.bottom: portsOnline.top
                 anchors.bottomMargin: 10
                 anchors.top: parent.top
@@ -70,39 +74,70 @@ Window {
             }
 
 
+            Component {
+                  id: userDelegate
+                  Item {
+                      id: wrapper
+                      width: portsOnline.width; height: 60
+                      Rectangle{
+                          id:rect
+                          width: 50
+                          height: 50
+                          radius: 50
+                          border{color: modelData.isOnline?"#006c84":"#ffccbb";width:5}
+                          Image {
+                              id: img
+                              width:40
+                              height: 40
+                              source: "qrc:/userpic2.png"
+                              anchors.centerIn: rect}
+                          }
+                      Text{
+                          anchors.centerIn: parent
+                          text: modelData.address}
+                      states: State {
+                          name: "Current"
+                          when: wrapper.ListView.isCurrentItem
+                          PropertyChanges { target: wrapper; x: 20 }
+                      }
+                      transitions: Transition {
+                          NumberAnimation { properties: "x"; duration: 200 }
+                      }
+                      MouseArea {
+                          anchors.fill: parent
+                          onClicked: wrapper.ListView.view.currentIndex = index
+                      }
+                  }
+              }
+
+            Component {
+                   id: highlightBar
+                   Rectangle {
+                       width: portsOnline.width; height: 60
+                       color: "#e2e8e4"
+                       radius: 10
+                       y: portsOnline.currentItem.y - 5;
+                       Behavior on y { SpringAnimation { spring: 0.5; damping: 0.1 } }
+                   }
+               }
 
             ListView{
                 id: portsOnline
+                width: 220
                 anchors.top: fileButton.bottom
                 anchors.topMargin: 10
-                anchors.right: parent.right
-                anchors.rightMargin: 10
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 10
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 spacing: 20
                 model:master.users
-                boundsBehavior: Flickable.DragOverBounds
-                delegate: Item {
-                    width: parent.width; height: 60
-                    Rectangle{
-                        id:rect
-                        width: 50
-                        height: 50
-                        Image {
-                            id: img
-                            width:40
-                            height: 40
-                            source: "qrc:/userpic2.png"
-                            anchors.centerIn: rect}
-                        border {color: modelData.isOnline?"#006c84":"#ffccbb"; width: 5}
-                        radius: 50}
-                    Text{
-                        anchors.centerIn: parent
-                        text: modelData.address}
-                }
 
+
+                delegate: userDelegate
+                focus: true
+                highlight: highlightBar
+                highlightFollowsCurrentItem: false
             }
         }
 

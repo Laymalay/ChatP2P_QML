@@ -54,25 +54,27 @@ void NetworkBackEnd::sendMsgToSocket(QTcpSocket* pSocket, const QString& str)
 
 void NetworkBackEnd::slotNewConnection() {
     qDebug()<<"NEW CONNECTION";
-    QTcpSocket* socket = server->nextPendingConnection();
-    connect(socket, SIGNAL(disconnected()),socket, SLOT(deleteLater()));
-    connect(socket, SIGNAL(readyRead()),this, SLOT(slotReadSocket()));
-    sendMsgToSocket(socket, "Response: Connected! " + thisPort);
+    if (server->hasPendingConnections()){
+        QTcpSocket* socket = server->nextPendingConnection();
+        connect(socket, SIGNAL(disconnected()),socket, SLOT(deleteLater()));
+        connect(socket, SIGNAL(readyRead()),this, SLOT(slotReadSocket()));
+        sendMsgToSocket(socket, "Response: Connected! " + thisPort);
+    }
 }
 
 void NetworkBackEnd::slotLogout()
 {
     qDebug()<<"======================================DISCONNECT====================================";
     timer->stop();
-    server->close();
     for(auto e: portMap->toStdMap()){
        QTcpSocket* s = e.second;
        qDebug()<<s->peerAddress()<<s->peerName()<<s->peerPort();
-       s->close();
+//       emit socketDisconnected(QString::number(s->peerPort()));
+       s->disconnectFromHost();
        s->deleteLater();
        portMap->remove(e.first);
-
     }
+    server->close();
 }
 
 void NetworkBackEnd::slotReadSocket()
@@ -151,7 +153,6 @@ NetworkBackEnd::~NetworkBackEnd()
 }
 
 void NetworkBackEnd::slotLookUpNewConnections(){
-    qDebug()<<"slotLookUpNewConnections";
     for (int i=0;i<notConnectedYet.size();i++){
           QTime timer;
           timer.start();

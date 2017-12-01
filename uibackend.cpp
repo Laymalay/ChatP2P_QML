@@ -41,15 +41,20 @@ User *UiBackEnd::user(int index) const
 void UiBackEnd::slotGetInfoMessage(QString txt)
 {
     _messages->append(txt);
-    emit messagesChanged(messages());
+    emit messagesChanged();
 }
 
 void UiBackEnd::slotLogout()
 {
     User* u = new User(thisPort);
     _users.append(u);
+    for (int i=0;i<_users.size();i++){
+        _users.at(i)->setStatus(false);
+    }
     emit usersChanged();
     emit logout();
+    _messages->clear();
+    emit messagesChanged();
     QSqlQuery query(db);
     query.exec("UPDATE ports SET status = 'free' WHERE number =" + thisPort);
     thisPort = "";
@@ -57,6 +62,7 @@ void UiBackEnd::slotLogout()
 
 void UiBackEnd::slotUserDisconnected(QString address)
 {
+    qDebug()<<address<<"DISCONNECTED";
     for(int i=0;i<_users.size();i++){
         if(_users.at(i)->address() == address){
             _users.at(i)->setStatus(false);
