@@ -7,6 +7,7 @@ NetworkBackEnd::NetworkBackEnd(QObject *parent) : m_nNextBlockSize(0)
     listOfPorts = new QStringList();
     server = new QTcpServer(this);
     portMap = new QMap<int,QTcpSocket*>();
+    socketMap = new QMap<int,int>();
 
 }
 
@@ -14,6 +15,16 @@ void NetworkBackEnd::process(){
     timer = new QTimer();
     timer->setInterval(2000);
     connect(timer, SIGNAL(timeout()), this, SLOT(slotLookUpNewConnections()));
+}
+
+void NetworkBackEnd::slotDisconnected()
+{
+    QTcpSocket* socket = (QTcpSocket*)sender();
+    qDebug()<<"--------------------Disconnected--------------------"<< socket->peerPort()<<socket->state();
+    emit socketDisconnected(QString::number(socketMap->key(socket->peerPort())));
+    notConnectedYet.append(QString::number(socketMap->key(socket->peerPort())));
+    socketMap->remove(socketMap->key(socket->peerPort()));
+
 }
 
 void NetworkBackEnd::slotStartServer(QStringList *_listOfPorts, QString _thisPort)
@@ -27,8 +38,6 @@ void NetworkBackEnd::slotStartServer(QStringList *_listOfPorts, QString _thisPor
     emit sendInfoMessage("server "+ thisPort + " has started");
 
     if(!server->listen(QHostAddress::Any, thisPort.toInt())){
-//        QMessageBox::critical(0,"server error",
-//                              "unable to start the server:"+server->errorString());
         qDebug()<<"unable to start the server:"+server->errorString();
         server->close();
         return;
@@ -56,9 +65,12 @@ void NetworkBackEnd::slotNewConnection() {
     qDebug()<<"NEW CONNECTION";
     if (server->hasPendingConnections()){
         QTcpSocket* socket = server->nextPendingConnection();
+        connect(socket, SIGNAL(disconnected()),this, SLOT(slotDisconnected()));
         connect(socket, SIGNAL(disconnected()),socket, SLOT(deleteLater()));
-        connect(socket, SIGNAL(readyRead()),this, SLOT(slotReadSocket()));
-        sendMsgToSocket(socket, "Response: Connected! " + thisPort);
+        connect(socket, SIGNAL(readyRead()),this, SLOT(slotReadyRead()));
+        connect(socket, SIGNAL(error(QAbstractSocket::SocketError)),
+                this, SLOT(slotError(QAbstractSocket::SocketError)));
+        sendMsgToSocket(socket, "Response: Connected! " + thisPort +"  "+ QString::number(socket->peerPort()));
     }
 }
 
@@ -69,10 +81,8 @@ void NetworkBackEnd::slotLogout()
     for(auto e: portMap->toStdMap()){
        QTcpSocket* s = e.second;
        qDebug()<<s->peerAddress()<<s->peerName()<<s->peerPort();
-//       emit socketDisconnected(QString::number(s->peerPort()));
        s->disconnectFromHost();
        s->deleteLater();
-       portMap->remove(e.first);
     }
     server->close();
 }
@@ -95,22 +105,22 @@ void NetworkBackEnd::slotReadSocket()
         QTime time;
         QString str;
         in >> time >> str;
-        QString strMessage = time.toString() + " " + "Client: " + str;
+        QString strMessage = time.toString() + " " + "Client: " + str + " " + pClientSocket->peerPort();
         emit sendInfoMessage(strMessage);
+        sendMsgToSocket(pClientSocket,thisPort);
         m_nNextBlockSize = 0;
      }
 }
 void NetworkBackEnd::slotConnected()
 {
     QTcpSocket* socket = (QTcpSocket*)sender();
-    qDebug()<<socket->peerPort();
-    qDebug()<<"Received the connected() signal   ";
-    emit sendInfoMessage("Received the connected() signal");
+    qDebug()<<"Received the connected() signal" << socket->peerPort();
+    emit sendInfoMessage("Received the connected() signal"+QString::number(socket->peerPort()));
 }
 
 void NetworkBackEnd::slotReadyRead()
 {
-   QTcpSocket* socket = (QTcpSocket*)sender();
+    QTcpSocket* socket = (QTcpSocket*)sender();
     QDataStream in(socket);
     in.setVersion(QDataStream::Qt_5_3);
     for(;;){
@@ -126,7 +136,11 @@ void NetworkBackEnd::slotReadyRead()
         QTime time;
         QString str;
         in>>time>>str;
-        emit sendInfoMessage(time.toString()+" Server: "+str);
+        emit sendInfoMessage(time.toString()+" Server: "+str +" "+ QString::number(socket->peerPort()));
+        socketMap->insert(str.toInt(),socket->peerPort());
+        for(auto e : socketMap->toStdMap()){
+            qDebug()<<e.first<<e.second;
+        }
         m_nNextBlockSize = 0;
     }
 }
@@ -134,6 +148,7 @@ void NetworkBackEnd::slotReadyRead()
 void NetworkBackEnd::slotError(QAbstractSocket::SocketError err)
 {
     QTcpSocket* socket = (QTcpSocket*)sender();
+    qDebug()<<socket->peerPort();
     QString strError =
             "Error: " + (err == QAbstractSocket::HostNotFoundError ?
                          "the host wasn't found." :
@@ -143,38 +158,43 @@ void NetworkBackEnd::slotError(QAbstractSocket::SocketError err)
                          "the connection was refused." :
                          QString(socket->errorString())
             );
-   emit socketDisconnected(QString::number(socket->peerPort()));
-   emit sendInfoMessage(strError);
-
+//   emit socketDisconnected(QString::number(socket->peerPort()));
+    qDebug()<<strError;
+// emit sendInfoMessage(strError);
 }
-NetworkBackEnd::~NetworkBackEnd()
-{
 
-}
 
 void NetworkBackEnd::slotLookUpNewConnections(){
     for (int i=0;i<notConnectedYet.size();i++){
+          qDebug()<<"slotLookUpNewConnections";
           QTime timer;
           timer.start();
           QTcpSocket* socket = new QTcpSocket();
           connect(socket, SIGNAL(connected()),this, SLOT(slotConnected()));
-          connect(socket, SIGNAL(readyRead()),this, SLOT(slotReadyRead()));
+          connect(socket, SIGNAL(readyRead()),this, SLOT(slotReadSocket()));
           connect(socket, SIGNAL(error(QAbstractSocket::SocketError)),
                   this, SLOT(slotError(QAbstractSocket::SocketError)));
           socket->connectToHost("localhost",(notConnectedYet.at(i)).toInt());
           if(socket->waitForConnected(500000)){
               qDebug()<<thisPort+"+"+notConnectedYet.at(i)<< "Connected in"<<timer.elapsed();
+              qDebug()<<"SOCKET CYCLE"<<thisPort<<socket->peerPort()<<socket;
               portMap->insert((notConnectedYet.at(i)).toInt(),socket);
               emit NewUserOnline(notConnectedYet.at(i));
               notConnectedYet.removeAt(i);
           }
           else{
               disconnect(socket, SIGNAL(connected()),this, SLOT(slotConnected()));
-              disconnect(socket, SIGNAL(readyRead()),this, SLOT(slotReadyRead()));
+              disconnect(socket, SIGNAL(readyRead()),this, SLOT(slotReadSocket()));
               disconnect(socket, SIGNAL(error(QAbstractSocket::SocketError)),
                       this, SLOT(slotError(QAbstractSocket::SocketError)));
               socket->deleteLater();
               qDebug()<<thisPort+"+"+notConnectedYet.at(i)<< "Not connected in"<<timer.elapsed();
           }
      }
+}
+
+
+NetworkBackEnd::~NetworkBackEnd()
+{
+
 }

@@ -14,8 +14,10 @@ public:
     QStringList* listOfPorts;
     QString thisPort;
     QMap<int,QTcpSocket*>* portMap;
+    QMap<int,int>* socketMap;
 public slots:
     void process();
+    void slotDisconnected();
     void slotLogout();
     void slotStartServer(QStringList *listOfPorts, QString thisPort);
 
