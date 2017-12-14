@@ -19,6 +19,7 @@ Window {
     title: qsTr("TCPCONNECTION")
     flags : Qt.WindowStaysOnTopHint;
 
+
     SplitView {
         id: splitView
         anchors.fill: parent
@@ -105,7 +106,9 @@ Window {
                       }
                       MouseArea {
                           anchors.fill: parent
-                          onClicked: wrapper.ListView.view.currentIndex = index
+                          onClicked: {
+                              wrapper.ListView.view.currentIndex = index
+                          }
                       }
                   }
               }
@@ -168,5 +171,6 @@ Window {
                }
 
         }
+
     }
 }

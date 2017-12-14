@@ -10,12 +10,14 @@ class User : public QObject
     Q_PROPERTY(QString address READ address NOTIFY addressChanged)
 public:
     explicit User(QString address, QObject *parent = nullptr);
-    bool _isOnline=false;
-    QString _address;
-
     bool isOnline();
     QString address();
     void setStatus(bool stat);
+private:
+    bool _isOnline=false;
+    QString _address;
+    QString _name;
+    int _id;
 signals:
     void statusChanged();
     void addressChanged();

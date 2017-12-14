@@ -20,7 +20,7 @@ void NetworkBackEnd::process(){
 void NetworkBackEnd::slotDisconnected()
 {
     QTcpSocket* socket = (QTcpSocket*)sender();
-    qDebug()<<"--------------------Disconnected--------------------"<< socket->peerPort()<<socket->state();
+    qDebug()<<"Disconnected: "<< socket->peerPort()<<socket->state();
     emit socketDisconnected(QString::number(socketMap->key(socket->peerPort())));
     notConnectedYet.append(QString::number(socketMap->key(socket->peerPort())));
     socketMap->remove(socketMap->key(socket->peerPort()));
@@ -76,7 +76,7 @@ void NetworkBackEnd::slotNewConnection() {
 
 void NetworkBackEnd::slotLogout()
 {
-    qDebug()<<"======================================DISCONNECT====================================";
+    qDebug()<<"ACTION LOGOUT";
     timer->stop();
     for(auto e: portMap->toStdMap()){
        QTcpSocket* s = e.second;

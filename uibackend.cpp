@@ -96,19 +96,32 @@ void UiBackEnd::destructor()
 
 void UiBackEnd::connectToDB()
 {
-    db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("/home/period-dev/ChatP2P_QML/ports.db");
 
-    if (!db.open())
-       {
-          qDebug()<<"Cannot open DB:"<<db.lastError();
-       }
-       else
-       {
-          qDebug() << "Database: connection ok";
-    }
+        if (!db.isValid()) {
+            db = QSqlDatabase::addDatabase("QSQLITE");
+            if (!db.isValid())
+                qFatal("Cannot add database: %s", qPrintable(db.lastError().text()));
+        }
+
+        const QDir writeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        if (!writeDir.mkpath("."))
+            qFatal("Failed to create writable directory at %s", qPrintable(writeDir.absolutePath()));
+
+        // Ensure that we have a writable location on all devices.
+        const QString fileName = writeDir.absolutePath() + "/chat-database.sqlite3";
+        // When using the SQLite driver, open() will create the SQLite database if it doesn't exist.
+        db.setDatabaseName(fileName);
+        if (!db.open()) {
+            qFatal("Cannot open database: %s", qPrintable(db.lastError().text()));
+            QFile::remove(fileName);
+        }
+
     QSqlQuery query(db);
+    query.exec("INSERT INTO ports VALUES (1, 49001,'free')");
+    query.exec("INSERT INTO ports VALUES (2, 49002,'free')");
+    query.exec("INSERT INTO ports VALUES (3, 49003,'free')");
     query.exec("SELECT number FROM ports");
+
     while (query.next()) {
        QString port = query.value(0).toString();
        _portList->append(port);
